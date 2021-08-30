@@ -1,5 +1,13 @@
 package Calculator;
 
+import static java.util.Collections.nCopies;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 public class Romes extends Number {
   private String romes_value1;
   private String romes_value2;
@@ -9,6 +17,50 @@ public class Romes extends Number {
   private String sign = "";
   private String result_string;
   private final String[] roman_letters_9 = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+  enum RomanNumeral {
+    I(1), IV(4), V(5), IX(9), X(10),
+    XL(40), L(50), XC(90), C(100),
+    CD(400), D(500), CM(900), M(1000);
+
+    private int value;
+
+    RomanNumeral(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+
+    public static List<RomanNumeral> getReverseSortedValues() {
+      return Arrays.stream(values())
+              .sorted(Comparator.comparing((RomanNumeral e) -> e.value).reversed())
+              .collect(Collectors.toList());
+    }
+  }
+
+  public static String arabicToRoman(int number) {
+    if ((number <= 0) || (number > 4000)) {
+      throw new IllegalArgumentException(number + " is not in range (0,4000]");
+    }
+
+    List<RomanNumeral> romanNumerals = RomanNumeral.getReverseSortedValues();
+
+    int i = 0;
+    StringBuilder sb = new StringBuilder();
+
+    while ((number > 0) && (i < romanNumerals.size())) {
+      RomanNumeral currentSymbol = romanNumerals.get(i);
+      if (currentSymbol.getValue() <= number) {
+        sb.append(currentSymbol.name());
+        number -= currentSymbol.getValue();
+      } else {
+        i++;
+      }
+    }
+
+    return sb.toString();
+  }
 
   Romes(String value1, String value2) {
     this.romes_value1 = value1;
@@ -16,7 +68,9 @@ public class Romes extends Number {
     this.romes_value1_int = convert_to_int(romes_value1);
     this.romes_value2_int = convert_to_int(romes_value2);
   }
-  private String convert_result_to_Romes(int n, int ostatok) {
+
+
+  /*private String convert_result_to_Romes(int n, int ostatok) {
     ostatok = n % 10;
     if (ostatok != 0) {
       try {
@@ -36,25 +90,25 @@ public class Romes extends Number {
     }   else {
       return sign;
     }
-  }
+  }*/
 
   @Override
   public void sum() {
     result_int = romes_value1_int + romes_value2_int;
-    result_string = convert_result_to_Romes(result_int, result_int);
+    result_string = arabicToRoman(result_int);
   }
 
   @Override
   public void sub() {
     result_int = romes_value1_int - romes_value2_int;
-    result_string = convert_result_to_Romes(result_int, result_int);
+    result_string = arabicToRoman(result_int);
   }
 
   @Override
   public void div() {
     try {
       result_int = romes_value1_int / romes_value2_int;
-      result_string = convert_result_to_Romes(result_int, result_int);
+      result_string = arabicToRoman(result_int);
     } catch (ArithmeticException e) {
       System.out.print("Проверьте правильность ввода римских цифр. Вероятно введены и арабские и римские одновременно. ");
       return;
@@ -65,7 +119,7 @@ public class Romes extends Number {
   @Override
   public void mul() {
     result_int = romes_value1_int * romes_value2_int;
-    result_string = convert_result_to_Romes(result_int, result_int);
+    result_string = arabicToRoman(result_int);
   }
 
   @Override
